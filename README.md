@@ -1,2 +1,3 @@
 # PictureToPC_Desktop
-The application for computers
+
+Click [here](https://github.com/mightytry/PictureToPC/releases/tag/installer) to get to the Installer!
