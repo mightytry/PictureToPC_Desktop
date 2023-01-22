@@ -72,7 +72,7 @@ namespace PictureToPC.Networking
             {
                 if (!conn.connecting && !conn.connected)
                 { 
-                    conn.Loop(new IPEndPoint(IPAddress.Parse(GetDefaultGateway().ToString()), 42069)); 
+                    conn.Loop(new IPEndPoint(IPAddress.Parse(GetDefaultGateway().ToString()), 42069), "Local"); 
                 }
                     
                 Thread.Sleep(1000);
@@ -84,30 +84,32 @@ namespace PictureToPC.Networking
         {
             while (true)
             {
-                byte[] b = new byte[1024];
-                EndPoint endPoint = new IPEndPoint(0,0);
-                socket.ReceiveFrom(b, 0, 1024, SocketFlags.None, ref endPoint);
-
-                Connect msg = JsonConvert.DeserializeObject<Connect>(Encoding.ASCII.GetString(b, 0, b.Length));
-
-                msg.ip = endPoint.ToString().Split(':')[0];
-
-
-                if (txtLog.Text == msg.code)
+#if RELEASE
+                try
                 {
-#if RELEASE
-                    try
-                    {
 #endif
-                        conn.Loop(new IPEndPoint(IPAddress.Parse(msg.ip), msg.port));
-#if RELEASE
-                    }
-                    catch
+                    byte[] b = new byte[1024];
+                    EndPoint endPoint = new IPEndPoint(0,0);
+                    socket.ReceiveFrom(b, 0, 1024, SocketFlags.None, ref endPoint);
+
+                    Connect msg = JsonConvert.DeserializeObject<Connect>(Encoding.ASCII.GetString(b, 0, b.Length));
+
+                    IPEndPoint ipEndPoint = (IPEndPoint)endPoint;
+                    ipEndPoint.Port = msg.port;
+
+
+                    if (txtLog.Text == msg.code)
                     {
-                        continue;
+
+                            conn.Loop(ipEndPoint, msg.name);
                     }
-#endif
+#if RELEASE
                 }
+                catch
+                {
+                    continue;
+                }
+#endif
             }
         }
     }

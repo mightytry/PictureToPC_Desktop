@@ -1,5 +1,6 @@
 using PictureToPC;
 using PictureToPC.Networking;
+using System.Diagnostics;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Windows.Forms;
@@ -19,12 +20,13 @@ namespace Forms
         private Image orginalImage;
         private readonly List<Image> imageQueue;
         private static readonly int[] ResulutionIndex = new int[] { 1920, 2560, 3840 };
-        private readonly Config Config;
+        public readonly Config Config;
         public CheckBox checkBox;
 
         public Form1()
         {
             InitializeComponent();
+
 
             checkBox = checkBox1;
 
@@ -32,9 +34,13 @@ namespace Forms
 
             Config = new();
 
+            Updater.SearchUpdate(Config.Version);
+
             comboBox1.SelectedIndex = Config.Data.OutputResulutionIndex;
             comboBox2.SelectedIndex = Config.Data.InternalResulutionIndex;
-            textBox1.Text = Config.Data.PartnerIpAddress;
+            textBox1.Text = Config.Data.ConnectionCode;
+            Debug.WriteLine(Config.Data.ConnectionName);
+            name_tb.Text = Config.Data.ConnectionName;
 
             
 
@@ -284,24 +290,9 @@ namespace Forms
 
         }
 
-        private void label5_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label4_Click(object sender, EventArgs e)
-        {
-
-        }
-
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
-            Config.Data.PartnerIpAddress = textBox1.Text;
-            Config.Save();
-        }
-
-        private void textBox1_Leave(object sender, EventArgs e)
-        {
+            Config.Data.ConnectionCode = textBox1.Text;
             Config.Save();
         }
 
@@ -344,6 +335,17 @@ namespace Forms
                 prevImage = null;
                 GetCorners();
             }
+        }
+
+        private void hideMenue_cb_CheckedChanged(object sender, EventArgs e)
+        {
+            groupBox1.Visible = !hideMenue_cb.Checked;
+        }
+        
+        private void name_tb_TextChanged(object sender, EventArgs e)
+        {
+            Config.Data.ConnectionName = name_tb.Text;
+            Config.Save();
         }
     }
 }

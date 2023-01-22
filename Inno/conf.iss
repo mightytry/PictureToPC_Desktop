@@ -1,6 +1,6 @@
-#define Version "0.8.0"
+#define Version "v0.9.0"
 ; Increment by one
-#define Update 1
+#define Update 2
 ; Set to current Version if Debs update
 #define UpdateDeps 1     
 
@@ -25,10 +25,11 @@ DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=commandline
-OutputBaseFilename=Installer v{#Version}
+OutputBaseFilename=Installer {#Version}
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
+ArchitecturesInstallIn64BitMode =x64
 
 [Languages]
 Name: "deutsch"; MessagesFile: "compiler:Languages/German.isl"
@@ -56,7 +57,8 @@ Name: "{autoprograms}\{#Name}"; Filename: "{app}\{#ExeName}"
 Name: "{autodesktop}\{#Name}"; Filename: "{app}\{#ExeName}"; Tasks: desktopicon
 
 [Registry]
-Root: "HKLM"; Subkey: "SOFTWARE\{#Publisher}\{#Name}"; ValueType: dword; ValueName: "Version"; ValueData: {#Update}; 
+Root: "HKLM"; Subkey: "SOFTWARE\{#Publisher}\{#Name}"; ValueType: dword; ValueName: "Version"; ValueData: {#Update}; Flags: uninsdeletekey; 
+Root: "HKLM"; Subkey: "SOFTWARE\{#Publisher}\{#Name}"; ValueType: string; ValueName: "VersionName"; ValueData: {#Version}; Flags: uninsdeletekey;
 
 [Run]
 Filename: "{app}\{#ExeName}"; Description: "{cm:LaunchProgram,{#StringChange(Name, '&', '&&')}}"; Flags: nowait postinstall skipifsilent

@@ -36,7 +36,6 @@ namespace PictureToPC.Networking
                     Close();
                     return null;
                 }
-                Debug.WriteLine(string.Join(",", buffer));
                 return Encoding.UTF8.GetString(buffer, 0, bytesRead).TrimEnd();
             }
             return null;
@@ -62,7 +61,7 @@ namespace PictureToPC.Networking
                     OnDataReceved((int)((float)bytesRead / size * 100));
                     old = bytesRead;
                 }
-                stream.Read(buffer, 0, 1024-(size%1024));
+                stream.Read(buffer, 0, 1024 - (size% 1024));
                 return data;
             }
             return null;
@@ -101,7 +100,7 @@ namespace PictureToPC.Networking
             }
         }
 
-        public void Loop(IPEndPoint endPoint)
+        public void Loop(IPEndPoint endPoint, string name)
         {
             connecting = true;
             try { client = new TcpClient(endPoint.Address.ToString(), endPoint.Port); }
@@ -111,18 +110,22 @@ namespace PictureToPC.Networking
             timeout.IsBackground = true;
             timeout.Start();
 
-
             stream = client.GetStream();
             connecting = false;
             connected = true;
-            form.Invoke(new Action(() => form.checkBox.Checked = true));
 
-            
+            form.Invoke(new Action(() => { form.checkBox.Checked = true; form.checkBox.Text = name; }));
+
+            //send name
+            byte[] bytes = new byte[1024];
+            Encoding.UTF8.GetBytes(form.Config.Data.ConnectionName).CopyTo(bytes, 0);
+            stream.WriteAsync(bytes, 0, bytes.Length);
+
             while (connected)
             {
                 buffer = new byte[1024];
                 string? pictureData = Receive();
-
+                    
                 if (pictureData == null)
                 {
                     Close();
@@ -142,7 +145,7 @@ namespace PictureToPC.Networking
                     continue;
                 }
 
-
+                
                 byte[]? pictureBytes = Receive(s);
                 if (pictureBytes == null)
                 {

@@ -1,18 +1,22 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Win32;
+using Newtonsoft.Json;
 
 namespace PictureToPC
 {
-    internal class Config
+    public class Config
     {
         public static string FolderName = "Mees Studio";
-        public static string FileName = "ImageToPC.json";
+        public static string ProgramName = "PictureToPC";
+        public static string FileName = "PictureToPC.json";
 
         public static string FilePath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\" + FolderName + "\\" + FileName;
         public Data Data;
-        internal Config()
+        public string Version;
+        public Config()
         {
             check();
             load();
+            Version = Registry.GetValue(@$"HKEY_LOCAL_MACHINE\SOFTWARE\{FolderName}\{ProgramName}", "VersionName", "v0.0.0") as string;
         }
 
         private void load()
@@ -52,25 +56,22 @@ namespace PictureToPC
         }
     }
 
-    internal class Data
+    public class Data
     {
         public int InternalResulutionIndex;
         public int OutputResulutionIndex;
 
-        public string PartnerIpAddress;
-        internal Data(int iI, int oI, string pA)
-        {
-            InternalResulutionIndex = iI;
-            OutputResulutionIndex = oI;
+        public string ConnectionCode;
+        public string ConnectionName;
 
-            PartnerIpAddress = pA;
-        }
-        internal Data()
+
+        public Data()
         {
             InternalResulutionIndex = 0;
             OutputResulutionIndex = 0;
 
-            PartnerIpAddress = "";
+            ConnectionCode = "";
+            ConnectionName = "Unbekannt";
         }
     }
 }

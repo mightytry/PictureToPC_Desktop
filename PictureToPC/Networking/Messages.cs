@@ -8,12 +8,11 @@ namespace PictureToPC.Networking
 {
     internal class Messages
     {
-
         public class Connect
         {
-            public string ip;
             public int port;
 
+            public string name;
             public string code;
         }
     }
