@@ -64,7 +64,7 @@ namespace Forms
             }
 
             CornersList = corners;
-            ActiveCorner = CornersList.Count > 1 ? 1 : 0;
+            ActiveCorner = 0;
             Invoke(new Action(() => { ResizeMarkers(null, null); }));
 
         }
