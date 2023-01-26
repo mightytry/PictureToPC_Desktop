@@ -66,8 +66,6 @@ namespace PictureToPC
                     sortedContours.Add(contours[i]);
                 }
             }
-            sortedContours.Sort((a, b) => CvInvoke.ArcLength(a, true).CompareTo(CvInvoke.ArcLength(b, true)));
-            sortedContours.Reverse();
 
             //loop through the contours and find the 4 corners
             foreach (VectorOfPoint contour in sortedContours)
@@ -84,6 +82,8 @@ namespace PictureToPC
 
                 }
             }
+
+            result.Sort((a, b) => ((a[1].X - a[0].X) * (a[0].Y - a[2].Y)).CompareTo((b[1].X - b[0].X) * (b[0].Y - b[2].Y)));
 
             return result;
         }
