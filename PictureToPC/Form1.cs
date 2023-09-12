@@ -39,10 +39,10 @@ namespace Forms
             comboBox1.SelectedIndex = Config.Data.OutputResulutionIndex;
             comboBox2.SelectedIndex = Config.Data.InternalResulutionIndex;
             textBox1.Text = Config.Data.ConnectionCode;
-            Debug.WriteLine(Config.Data.ConnectionName);
             name_tb.Text = Config.Data.ConnectionName;
+            checkBox2.Checked = Config.Data.UsingExperimentalContrast;
 
-            
+
 
             MoveEvent = new Dictionary<Button, MouseEventHandler>();
             UpEvent = new Dictionary<Button, MouseEventHandler>();
@@ -54,7 +54,7 @@ namespace Forms
 
             FormClosed += new FormClosedEventHandler((o, t) => { Server.Close(); });
         }
-        
+
         private void GetCorners()
         {
             List<Point[]> corners = ImagePrep.getCorners(pictureBox1.Image, InternalResulution);
@@ -115,6 +115,11 @@ namespace Forms
 
         private void button3_Click(object? sender, EventArgs? e)
         {
+            if (checkBox2.Checked)
+            {
+                pictureBox1.Image = ImagePrep.ExperimentalContrast(pictureBox1.Image);
+                return;
+            }
             pictureBox1.Image = ImagePrep.Contrast(pictureBox1.Image);
         }
 
@@ -241,7 +246,7 @@ namespace Forms
         {
             if (pictureBox1.Image == null)
             {
-                Invoke(new Action(() => { orginalImage = img;  pictureBox1.Invalidate(); pictureBox1.Image = img; GetCorners(); }));
+                Invoke(new Action(() => { orginalImage = img; pictureBox1.Invalidate(); pictureBox1.Image = img; GetCorners(); }));
             }
             else
             {
@@ -341,10 +346,16 @@ namespace Forms
         {
             groupBox1.Visible = !hideMenue_cb.Checked;
         }
-        
+
         private void name_tb_TextChanged(object sender, EventArgs e)
         {
             Config.Data.ConnectionName = name_tb.Text;
+            Config.Save();
+        }
+
+        private void checkBox2_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.Data.UsingExperimentalContrast = checkBox2.Checked;
             Config.Save();
         }
     }

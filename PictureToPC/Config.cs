@@ -61,6 +61,8 @@ namespace PictureToPC
         public int InternalResulutionIndex;
         public int OutputResulutionIndex;
 
+        public bool UsingExperimentalContrast;
+
         public string ConnectionCode;
         public string ConnectionName;
 
@@ -69,6 +71,8 @@ namespace PictureToPC
         {
             InternalResulutionIndex = 0;
             OutputResulutionIndex = 0;
+
+            UsingExperimentalContrast = false;
 
             ConnectionCode = "";
             ConnectionName = "Unbekannt";

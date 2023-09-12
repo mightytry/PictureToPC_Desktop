@@ -1,4 +1,6 @@
 ﻿using Emgu.CV;
+using Emgu.CV.CvEnum;
+using Emgu.CV.ML;
 using Emgu.CV.Structure;
 using Emgu.CV.Util;
 using Forms;
@@ -157,6 +159,50 @@ namespace PictureToPC
             }
 
             return i;
+        }
+        public static Image ExperimentalContrast(Image img)
+        {
+            float f = GetFactor(img.Size, Form1.InternalResulution);
+
+
+            Mat org_image = (img as Bitmap).ToMat();
+
+            Mat image = new(new Size((int)(org_image.Width * f), (int)(org_image.Height * f)), DepthType.Cv8U, 3);
+
+            CvInvoke.Resize(org_image, image, new Size(0, 0), f, f);
+
+            int size = getShape(image.Size, 100);
+            int size3 = getShape(image.Size, 80);
+            int size2 = getShape(image.Size, 30);
+
+            var mats = image.Split();
+
+            CvInvoke.CLAHE(mats[0], 1.85, new Size(size, size), mats[0]);
+            CvInvoke.CLAHE(mats[1], 1.85, new Size(size, size), mats[1]);
+            CvInvoke.CLAHE(mats[2], 1.85, new Size(size, size), mats[2]);
+
+
+            CvInvoke.Merge(new VectorOfMat(mats), image);
+
+            float[,] matrix = new float[3, 3] { { 0, -1, 0 }, { -1, 5.4f, -1 }, { 0, -1, 0 } };
+
+            ConvolutionKernelF matrixKernel = new ConvolutionKernelF(matrix);
+
+            // remove noise
+
+            CvInvoke.Filter2D(image, image, matrixKernel, new Point(0, 0));
+
+
+            Mat mt = new(new Size(image.Width, image.Height), DepthType.Cv8U, 3);
+            CvInvoke.BilateralFilter(image, mt, size3, size2, size2);
+
+
+            CvInvoke.Resize(mt, image, new Size(image.Width, image.Height), 0, 0, Inter.Area);
+
+            mt.Dispose();
+            org_image.Dispose();
+
+            return image.ToBitmap();
         }
 
         public static Image Contrast(Image img)
