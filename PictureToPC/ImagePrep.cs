@@ -5,6 +5,7 @@ using Emgu.CV.Structure;
 using Emgu.CV.Util;
 using Forms;
 using System.Diagnostics;
+using System.Drawing.Drawing2D;
 using Point = System.Drawing.Point;
 
 namespace PictureToPC
@@ -161,6 +162,36 @@ namespace PictureToPC
             return i;
         }
         public static Image ExperimentalContrast(Image img)
+        {
+            float f = GetFactor(img.Size, Form1.InternalResulution);
+
+
+            Mat org_image = (img as Bitmap).ToMat();
+
+            Mat image = new(new Size((int)(org_image.Width * f), (int)(org_image.Height * f)), DepthType.Cv8U, 3);
+
+            CvInvoke.Resize(org_image, image, new Size(0, 0), f, f);
+
+            Mat mt = new(new Size(image.Width, image.Height), DepthType.Cv8U, 3);
+            image.ConvertTo(image, DepthType.Cv8U, 1.9, -80);
+
+            float[,] matrix = new float[3, 3] { { 0, -1, 0 }, { -1, 5f, -1 }, { 0, -1, 0 } };
+            ConvolutionKernelF matrixKernel = new ConvolutionKernelF(matrix);
+
+ 
+
+            CvInvoke.Filter2D(image, mt, matrixKernel, new Point(0, 0));
+
+
+            CvInvoke.BilateralFilter(mt, image, 10, 75, 75);
+            //CvInvoke.FastNlMeansDenoisingColored(image, image, 10, 10, 7, 21);
+
+            CvInvoke.Resize(image, org_image, new Size(org_image.Width, org_image.Height), 0, 0, Inter.NearestExact);
+
+            return org_image.ToBitmap();
+
+        }
+        public static Image oldExperimentalContrast(Image img)
         {
             float f = GetFactor(img.Size, Form1.InternalResulution);
 
