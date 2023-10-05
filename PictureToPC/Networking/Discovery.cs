@@ -15,9 +15,9 @@ namespace PictureToPC.Networking
         public static Socket socket;
         public static Connection conn;
         public static TextBox txtLog;
-        public static Thread network;
-        public static Thread network2;
-        
+        public static List<Client> clients = new List<Client>();
+        public static CancellationTokenSource cts = new CancellationTokenSource();
+        public static CancellationToken ct = cts.Token;
 
         public static void Start(Connection _conn, TextBox text, string _ip = "224.69.69.69", int _port = 42069)
         {
@@ -33,23 +33,9 @@ namespace PictureToPC.Networking
             
             conn = _conn;
             txtLog = text;
-            
-            if (network != null)
-            {
-                network.Abort();
-            }
 
-            network = new(new ThreadStart(new Action(() => { Recive(); })));
-
-            network.IsBackground = true;
-
-            network.Start();
-
-            network2 = new(new ThreadStart(new Action(() => { hostRecive(); })));
-
-            network2.IsBackground = true;
-
-            network2.Start();
+            hostRecive();
+            Recive();
         }
 
         public static IPAddress GetDefaultGateway()
@@ -66,42 +52,77 @@ namespace PictureToPC.Networking
                 .FirstOrDefault();
         }
 
-        public static void hostRecive()
+        public static async void hostRecive()
         {
-            while (true)
+            Client client = new Client(new IPEndPoint(IPAddress.Parse(GetDefaultGateway().ToString()), 42069), "Local");
+            clients.Add(client);
+            while (!ct.IsCancellationRequested)
             {
-                if (!conn.connecting && !conn.connected)
-                { 
-                    conn.Loop(new IPEndPoint(IPAddress.Parse(GetDefaultGateway().ToString()), 42069), "Local"); 
+                if (!client.connected && !client.connecting)
+                {
+                    client.Start();
                 }
-                    
-                Thread.Sleep(1000);
+                try
+                {
+                    await Task.Delay(1000, ct);
+                }
+                catch
+                {
+                    break;
+                }
             }
             
         }
 
-        public static void Recive()
+        public static void Stop()
         {
-            while (true)
+            cts.Cancel();
+            socket.Close();
+            foreach (Client client in clients.ToArray())
+            {
+                client.Stop();
+            }
+        }
+
+        public static async void Recive()
+        {
+            while (!ct.IsCancellationRequested)
             {
 #if RELEASE
                 try
                 {
 #endif
+
                     byte[] b = new byte[1024];
                     EndPoint endPoint = new IPEndPoint(0,0);
-                    socket.ReceiveFrom(b, 0, 1024, SocketFlags.None, ref endPoint);
+                SocketReceiveFromResult erg;
+                try
+                    {
+                        erg = await socket.ReceiveFromAsync(b, SocketFlags.None, endPoint, ct);
+                    
+                }
+                    catch
+                    {
+                    continue;
+                    }
 
-                    Connect msg = JsonConvert.DeserializeObject<Connect>(Encoding.ASCII.GetString(b, 0, b.Length));
+
+                endPoint = erg.RemoteEndPoint;
+                Connect msg = JsonConvert.DeserializeObject<Connect>(Encoding.ASCII.GetString(b, 0, erg.ReceivedBytes));
 
                     IPEndPoint ipEndPoint = (IPEndPoint)endPoint;
                     ipEndPoint.Port = msg.port;
 
+                    if (clients.Find(x => x.endPoint.GetHashCode() == ipEndPoint.GetHashCode()) != null)
+                {
+                        continue;
+                    }
 
                     if (txtLog.Text == msg.code)
                     {
-
-                            conn.Loop(ipEndPoint, msg.name);
+                        Client client = new Client(ipEndPoint, msg.name);
+                        clients.Add(client);
+                        client.Start();
                     }
 #if RELEASE
                 }

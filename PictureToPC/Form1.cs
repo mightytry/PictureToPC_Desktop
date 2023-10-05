@@ -21,16 +21,12 @@ namespace Forms
         private readonly List<Image> imageQueue;
         private static readonly int[] ResulutionIndex = new int[] { 1920, 2560, 3840 };
         public readonly Config Config;
-        public CheckBox checkBox;
 
         public Form1()
         {
             InitializeComponent();
 
-
-            checkBox = checkBox1;
-
-            Server = new(this, UpdateProgressBar);
+            ClientEventHandler.form = this;
 
             Config = new();
 
@@ -52,7 +48,7 @@ namespace Forms
             Resize += new EventHandler(ResizeMarkers);
             //NetworkChange.NetworkAddressChanged += new NetworkAddressChangedEventHandler(Discovery.NetworkAddressChanged); //maybe
 
-            FormClosed += new FormClosedEventHandler((o, t) => { Server.Close(); });
+            FormClosed += new FormClosedEventHandler((o, t) => { Discovery.Stop(); });
         }
 
         private void GetCorners()
@@ -140,6 +136,7 @@ namespace Forms
                 orginalImage = imageQueue[0];
                 pictureBox1.Image = imageQueue[0];
                 imageQueue.RemoveAt(0);
+                pictureCountTB.Text = imageQueue.Count.ToString();
                 GetCorners();
             }
         }
@@ -152,6 +149,14 @@ namespace Forms
         private void label1_Click(object sender, EventArgs e)
         {
 
+        }
+
+        public void changeConenctionCount(int count)
+        {
+            Invoke(new Action(() =>
+            {
+                connectionsTB.Text = count.ToString();
+            }));
         }
 
         private void label2_Click(object sender, EventArgs e)
@@ -251,6 +256,7 @@ namespace Forms
             else
             {
                 imageQueue.Add(img);
+                pictureCountTB.Text = imageQueue.Count.ToString();
             }
         }
 
@@ -306,7 +312,7 @@ namespace Forms
 
         }
 
-        private void UpdateProgressBar(int i)
+        public void UpdateProgressBar(int i)
         {
             Invoke(new Action(() =>
             {
