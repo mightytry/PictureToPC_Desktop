@@ -1,11 +1,4 @@
 ﻿using Forms;
-using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Security.Permissions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PictureToPC.Networking
 {
@@ -14,7 +7,7 @@ namespace PictureToPC.Networking
         public Client client;
         public static Form1 form;
         internal static string connectionName { get => form.Config.Data.ConnectionName; }
-        internal static int connectionCount = 0;
+        internal static List<Client> clients = new List<Client>();
 
         internal ClientEventHandler(Client pClient)
         {
@@ -33,19 +26,18 @@ namespace PictureToPC.Networking
         {
             if (connected)
             {
-                connectionCount++;
-                
+                clients.Add(client);
             }
             else
             {
-                connectionCount--;
+                clients.Remove(client);
                 Discovery.clients.Remove(client);
             }
             if (form == null)
             {
                 return;
             }
-            form.changeConenctionCount(connectionCount);
+            form.changeConenctionCount(clients);
         }
         internal void onNewPicture(Bitmap image)
         {

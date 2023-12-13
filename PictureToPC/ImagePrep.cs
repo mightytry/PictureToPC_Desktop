@@ -1,11 +1,9 @@
 ﻿using Emgu.CV;
 using Emgu.CV.CvEnum;
-using Emgu.CV.ML;
 using Emgu.CV.Structure;
 using Emgu.CV.Util;
 using Forms;
 using System.Diagnostics;
-using System.Drawing.Drawing2D;
 using Point = System.Drawing.Point;
 
 namespace PictureToPC
@@ -64,7 +62,7 @@ namespace PictureToPC
             List<VectorOfPoint> sortedContours = new();
             for (int i = 0; i < contours.Size; i++)
             {
-                if (CvInvoke.ContourArea(contours[i]) > 10000*f)
+                if (CvInvoke.ContourArea(contours[i]) > 10000 * f)
                 {
                     sortedContours.Add(contours[i]);
                 }
@@ -121,7 +119,7 @@ namespace PictureToPC
             tr.Offset((int)((tr.X * f) - tr.X), (int)((tr.Y * f) - tr.Y));
             bl.Offset((int)((bl.X * f) - bl.X), (int)((bl.Y * f) - bl.Y));
             br.Offset((int)((br.X * f) - br.X), (int)((br.Y * f) - br.Y));
-            
+
             return new Point[] { tl, tr, bl, br };
         }
 
@@ -178,7 +176,7 @@ namespace PictureToPC
             float[,] matrix = new float[3, 3] { { 0, -1, 0 }, { -1, 5f, -1 }, { 0, -1, 0 } };
             ConvolutionKernelF matrixKernel = new ConvolutionKernelF(matrix);
 
- 
+
 
             CvInvoke.Filter2D(image, mt, matrixKernel, new Point(0, 0));
 

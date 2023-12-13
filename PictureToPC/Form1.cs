@@ -1,9 +1,7 @@
 using PictureToPC;
 using PictureToPC.Networking;
 using System.Diagnostics;
-using System.Net;
 using System.Net.NetworkInformation;
-using System.Windows.Forms;
 
 namespace Forms
 {
@@ -151,11 +149,12 @@ namespace Forms
 
         }
 
-        public void changeConenctionCount(int count)
+        internal void changeConenctionCount(List<Client> clients)
         {
             Invoke(new Action(() =>
             {
-                connectionsTB.Text = count.ToString();
+                connectionsTB.Text = clients.Count.ToString();
+                connectionslistLB.Text = string.Join("\n", clients.Select((c) => "• " + c.ServerName));
             }));
         }
 
@@ -363,6 +362,31 @@ namespace Forms
         {
             Config.Data.UsingExperimentalContrast = checkBox2.Checked;
             Config.Save();
+        }
+
+        private void groupBox5_Enter(object sender, EventArgs e)
+        {
+
+        }
+
+        private void hoverConnectionsAmount(object sender, EventArgs e)
+        {
+            connectionslistLB.Visible = true;
+        }
+
+        private void unhoverConnectionsAmount(object sender, EventArgs e)
+        {
+            connectionslistLB.Visible = false;
+        }
+
+        private void rotateBT_Click(object sender, EventArgs e)
+        {
+            if (pictureBox1.Image == null)
+            {
+                return;
+            }
+            pictureBox1.Image.RotateFlip(RotateFlipType.Rotate90FlipNone);
+            pictureBox1.Invalidate();
         }
     }
 }

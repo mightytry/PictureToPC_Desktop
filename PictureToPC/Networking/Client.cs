@@ -1,11 +1,7 @@
-﻿using Forms;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Sockets;
+﻿using System.Diagnostics;
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace PictureToPC.Networking
 {
@@ -18,18 +14,20 @@ namespace PictureToPC.Networking
         public bool connecting;
         public bool connected { get => client.Connected; }
         public string connCode;
+        public readonly string? Code;
         private byte[] buffer;
         private readonly ClientEventHandler eventHandler;
         CancellationTokenSource source;
 
 
-        public Client(IPEndPoint endPoint, string name)
+        public Client(IPEndPoint endPoint, string name, string? code = null)
         {
             eventHandler = new(this);
             ServerName = name;
             client = new TcpClient();
             this.endPoint = endPoint;
             source = new CancellationTokenSource();
+            Code = code;
         }
 
         public async void Start()
@@ -128,7 +126,7 @@ namespace PictureToPC.Networking
                 client.Close();
                 client.Dispose();
             }
-            
+
         }
         private async Task Timeout(CancellationToken cToken)
         {
@@ -166,7 +164,8 @@ namespace PictureToPC.Networking
                 try
                 {
                     s = int.Parse(pictureData);
-                } catch
+                }
+                catch
                 {
                     return;
                 }

@@ -1,12 +1,5 @@
 ﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Net;
-using System.Security.Policy;
-using System.Text;
-using System.IO;
 
 namespace PictureToPC.Networking
 {
@@ -57,14 +50,14 @@ namespace PictureToPC.Networking
                             await streamToReadFrom.CopyToAsync(file);
                         }
                         Process.Start(Path.Combine(Path.GetTempPath(), "Update.exe"));
-                        
+
                         Environment.Exit(0);
                     }
                 }
 
             }
         }
-        
+
 
         private async static Task<Root?> Get_Online_Version(string url, HttpClient client)
         {
@@ -77,7 +70,7 @@ namespace PictureToPC.Networking
                 return myDeserializedClass;
 #if !DEBUG
             }
-            catch (Exception )
+            catch (Exception)
             {
                 return null;
             }
