@@ -14,7 +14,6 @@ namespace PictureToPC.Networking
         public static TextBox txtLog;
         public static List<Client> clients = new List<Client>();
         public static CancellationTokenSource cts = new CancellationTokenSource();
-        public static CancellationToken ct = cts.Token;
 
         public static void Start(Connection _conn, TextBox text, string _ip = "224.69.69.69", int _port = 42069)
         {
@@ -44,33 +43,49 @@ namespace PictureToPC.Networking
 
             hostRecive();
             Recive();
+            NetworkChange.NetworkAddressChanged += NetworkAddressChanged;
+
+        }
+
+        private static void NetworkAddressChanged(object? sender, EventArgs e)
+        {
+            Stop(false);
+            cts = new CancellationTokenSource();
+            hostRecive();
+            Recive();
         }
 
         public static IPAddress? GetDefaultGateway()
         {
-           return NetworkInterface.GetAllNetworkInterfaces().FirstOrDefault((n) =>
-                       n != null &&
-                       n.NetworkInterfaceType != NetworkInterfaceType.Loopback &&
-                       n.NetworkInterfaceType != NetworkInterfaceType.Tunnel &&
-                       n.IsReceiveOnly == false &&
-                      !n.Name.StartsWith("vEthernet") &&
-                       n.OperationalStatus == OperationalStatus.Up
-            , null)?.GetIPProperties().UnicastAddresses.First((a) => a.Address.AddressFamily == AddressFamily.InterNetwork).Address;
+            return NetworkInterface.GetAllNetworkInterfaces().FirstOrDefault((n) =>
+                        n != null &&
+                        n.NetworkInterfaceType != NetworkInterfaceType.Loopback &&
+                        n.NetworkInterfaceType != NetworkInterfaceType.Tunnel &&
+                        n.IsReceiveOnly == false &&
+                       !n.Name.StartsWith("vEthernet") &&
+                        n.OperationalStatus == OperationalStatus.Up
+             , null)?.GetIPProperties().GatewayAddresses.First((a) => a.Address.AddressFamily == AddressFamily.InterNetwork).Address;
         }
 
         public static async void hostRecive()
         {
             IPAddress? ip = GetDefaultGateway();
             Client? client = null;
-            if (ip != null)
+            if (ip == null)
             {
-                client = new Client(new IPEndPoint(ip, 42069), "Local");
-                clients.Add(client);
+                cts.Cancel();
+                return;
             }
-            
+
+            client = new Client(new IPEndPoint(ip, 42069), "Local");
+            clients.Add(client);
+
+            CancellationToken ct = cts.Token;
+
+
             while (!ct.IsCancellationRequested)
             {
-                if (client != null && !client.connected && !client.connecting)
+                if (!client.connected && !client.connecting)
                 {
                     client.Start();
                 }
@@ -82,43 +97,23 @@ namespace PictureToPC.Networking
                 {
                     break;
                 }
-                if (client == null || (!client.connected && !ip.Equals(GetDefaultGateway())))
-                {
-                    if (client != null)
-                    {
-                        client.Stop();
-                        clients.Remove(client);
-                    }
-                    ip = GetDefaultGateway();
-                    if (ip == null)
-                    {
-                        foreach (Client c in clients.ToArray())
-                        {
-                            c.Stop();
-                        }
-                        clients.Clear();
-                        client = null;
-                        continue;
-                    }
-                    client = new Client(new IPEndPoint(ip, 42069), "Local");
-                    clients.Add(client);
-                }
             }
-
         }
 
-        public static void Stop()
+        public static void Stop(bool closeSocket = false)
         {
             cts.Cancel();
-            socket.Close();
+            if (closeSocket) socket.Close();
             foreach (Client client in clients.ToArray())
             {
                 client.Stop();
             }
+            clients.Clear();
         }
 
         public static async void Recive()
         {
+            CancellationToken ct = cts.Token;
             while (!ct.IsCancellationRequested)
             {
 #if RELEASE

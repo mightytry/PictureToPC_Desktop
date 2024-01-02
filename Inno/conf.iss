@@ -1,6 +1,6 @@
-#define Version "v0.9.5"
+#define Version "v0.9.6"
 ; Increment by one
-#define Update 7
+#define Update 8
 ; Set to current Version if Debs update
 #define UpdateDeps 1     
 
@@ -26,7 +26,6 @@ DisableProgramGroupPage=yes
 ;PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=commandline
 OutputBaseFilename=Installer {#Version}
-Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
 ArchitecturesInstallIn64BitMode =x64
