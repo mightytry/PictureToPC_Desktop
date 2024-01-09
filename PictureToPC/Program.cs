@@ -34,9 +34,6 @@ namespace PictureToPC
             // check if the process is running
             if (process.Length >= 2)
             {
-                // check if the window is hidden / minimized
-
-                // the window is hidden so try to restore it before setting focus.
                 ShowWindow(process[0].MainWindowHandle, ShowWindowEnum.Restore);
                 
 

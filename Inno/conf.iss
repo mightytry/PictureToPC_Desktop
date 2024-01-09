@@ -1,6 +1,6 @@
-#define Version "v0.9.6"
+#define Version "v0.9.7"
 ; Increment by one
-#define Update 8
+#define Update 9
 ; Set to current Version if Debs update
 #define UpdateDeps 1     
 
