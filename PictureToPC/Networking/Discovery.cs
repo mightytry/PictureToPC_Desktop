@@ -18,6 +18,7 @@ namespace PictureToPC.Networking
         public static void Start(Connection _conn, TextBox text, string _ip = "224.69.69.69", int _port = 42069)
         {
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, 1);
 
             IPEndPoint ipep = new IPEndPoint(IPAddress.Any, _port);
 
@@ -57,14 +58,9 @@ namespace PictureToPC.Networking
 
         public static IPAddress? GetDefaultGateway()
         {
-            return NetworkInterface.GetAllNetworkInterfaces().FirstOrDefault((n) =>
-                        n != null &&
-                        n.NetworkInterfaceType != NetworkInterfaceType.Loopback &&
-                        n.NetworkInterfaceType != NetworkInterfaceType.Tunnel &&
-                        n.IsReceiveOnly == false &&
-                       !n.Name.StartsWith("vEthernet") &&
-                        n.OperationalStatus == OperationalStatus.Up
-             , null)?.GetIPProperties().GatewayAddresses.First((a) => a.Address.AddressFamily == AddressFamily.InterNetwork).Address;
+            IPHostEntry localhost = Dns.GetHostEntry(Dns.GetHostName());
+            IPAddress? localIpAddress = localhost.AddressList.FirstOrDefault((n) => n.AddressFamily == AddressFamily.InterNetwork, null);
+            return localIpAddress;
         }
 
         public static async void hostRecive()
