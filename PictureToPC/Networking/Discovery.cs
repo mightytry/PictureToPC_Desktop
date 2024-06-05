@@ -15,6 +15,9 @@ namespace PictureToPC.Networking
         public static List<Client> clients = new List<Client>();
         public static CancellationTokenSource cts = new CancellationTokenSource();
 
+        private static IPAddress ip;
+        private static MulticastOption? multicastOption = null;
+
         public static void Start(Connection _conn, TextBox text, string _ip = "224.69.69.69", int _port = 42069)
         {
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
@@ -24,9 +27,11 @@ namespace PictureToPC.Networking
 
             socket.Bind(ipep);
 
-            IPAddress ip = IPAddress.Parse(_ip);
+            ip = IPAddress.Parse(_ip);
 
-            socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.AddMembership, new MulticastOption(ip, IPAddress.Any));
+
+            UpdateMCastOption();
+
 
             conn = _conn;
             txtLog = text;
@@ -48,10 +53,21 @@ namespace PictureToPC.Networking
 
         }
 
+        private static void UpdateMCastOption()
+        {
+            if (multicastOption != null)
+            {
+                socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.DropMembership, multicastOption);
+            }
+            multicastOption = new MulticastOption(ip, GetDefaultGateway() ?? IPAddress.Any);
+            socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.AddMembership, multicastOption);
+        }
+
         private static void NetworkAddressChanged(object? sender, EventArgs e)
         {
             Stop(false);
             cts = new CancellationTokenSource();
+            UpdateMCastOption();
             hostRecive();
             Recive();
         }
