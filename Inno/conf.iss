@@ -1,6 +1,6 @@
-#define Version "v0.9.7"
+#define Version "v0.9.8"
 ; Increment by one
-#define Update 9
+#define Update 10
 ; Set to current Version if Debs update
 #define UpdateDeps 1     
 
@@ -8,6 +8,7 @@
 #define Publisher "Mees Studio"
 #define URL "https://github.com/mightytry/PictureToPC_Desktop/releases/tag/latest"
 #define ExeName "PictureToPC.exe"
+#define BinLocation "Z:\Cloud\Programieren\Github\PictureToPC_Desktop\PictureToPC\bin\Release\net6.0-windows"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
@@ -38,9 +39,9 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "Z:\Cloud\Programieren\Github\PictureToPC_Desktop\PictureToPC\bin\Release\net6.0-windows\{#ExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Z:\Cloud\Programieren\Github\PictureToPC_Desktop\PictureToPC\bin\Release\net6.0-windows\PictureToPC.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "Z:\Cloud\Programieren\Github\PictureToPC_Desktop\PictureToPC\bin\Release\net6.0-windows\PictureToPC.runtimeconfig.json"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinLocation}\{#ExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinLocation}\PictureToPC.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#BinLocation}\PictureToPC.runtimeconfig.json"; DestDir: "{app}"; Flags: ignoreversion
 Source: "7za.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall; Check: did_Download
 Source: "{tmp}\x64\*"; DestDir: "{app}"; Flags: external recursesubdirs; Check: did_Download; BeforeInstall: Extract
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
