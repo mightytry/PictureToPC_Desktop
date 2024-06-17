@@ -30,7 +30,7 @@ namespace PictureToPC.Networking
             Code = code;
         }
 
-        public async void Start()
+        public async void Start(bool closeSocket = true)
         {
             CancellationToken token = source.Token;
 
@@ -38,7 +38,7 @@ namespace PictureToPC.Networking
             {
                 await Task.WhenAny(Loop(token), Timeout(token));
             }
-            Close(source);
+            Close(source, closeSocket);
         }
 
         private async Task<bool> Connect()
@@ -106,7 +106,7 @@ namespace PictureToPC.Networking
             source.Cancel();
         }
 
-        private void Close(CancellationTokenSource cSource)
+        private void Close(CancellationTokenSource cSource, bool closeAll = true)
         {
             cSource.Cancel();
             if (!connecting)
@@ -114,7 +114,7 @@ namespace PictureToPC.Networking
                 connecting = false;
                 eventHandler.onClientConnectionChanged(false);
             }
-
+            if (!closeAll) return;
             if (stream != null)
             {
                 stream.Close();

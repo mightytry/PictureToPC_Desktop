@@ -57,9 +57,14 @@ namespace PictureToPC.Networking
         {
             if (multicastOption != null)
             {
-                socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.DropMembership, multicastOption);
+                try
+                {
+                    socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.DropMembership, multicastOption);
+                }
+                catch
+                { }
             }
-            multicastOption = new MulticastOption(ip, GetDefaultGateway() ?? IPAddress.Any);
+            multicastOption = new MulticastOption(ip, GetIPAddress() ?? IPAddress.Any);
             socket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.AddMembership, multicastOption);
         }
 
@@ -72,11 +77,25 @@ namespace PictureToPC.Networking
             Recive();
         }
 
-        public static IPAddress? GetDefaultGateway()
+        public static IPAddress? GetIPAddress()
         {
             IPHostEntry localhost = Dns.GetHostEntry(Dns.GetHostName());
             IPAddress? localIpAddress = localhost.AddressList.FirstOrDefault((n) => n.AddressFamily == AddressFamily.InterNetwork, null);
             return localIpAddress;
+        }
+
+        public static IPAddress? GetDefaultGateway()
+        {
+            IPAddress? searchIP = GetIPAddress();
+            if (searchIP == null) { return null; }
+            var addresses = NetworkInterface.GetAllNetworkInterfaces();
+            foreach (var address in addresses) {
+                if (address.GetIPProperties().UnicastAddresses.Any(l => l.Address.Equals(searchIP)))
+                {
+                    return address.GetIPProperties().GatewayAddresses.FirstOrDefault()?.Address;
+                }
+            }
+            return null;
         }
 
         public static async void hostRecive()
@@ -99,7 +118,7 @@ namespace PictureToPC.Networking
             {
                 if (!client.connected && !client.connecting)
                 {
-                    client.Start();
+                    client.Start(false);
                 }
                 try
                 {
